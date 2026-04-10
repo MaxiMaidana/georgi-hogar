@@ -76,15 +76,20 @@ export default function ProductCard({ product }: { product: Product }) {
           {product.name}
         </Link>
 
-        <div className="mt-auto flex items-baseline gap-2 pt-1">
-          {hasDiscount && (
-            <span className="text-xs text-zinc-500 line-through sm:text-sm">
-              {formatARS(product.previous_price!)}
+        <div className="mt-auto flex flex-col gap-1 pt-1">
+          <div className="flex items-baseline gap-2">
+            {hasDiscount && (
+              <span className="text-xs text-zinc-500 line-through sm:text-sm">
+                {formatARS(product.previous_price!)}
+              </span>
+            )}
+            <span className="text-base font-bold text-white sm:text-lg">
+              {formatARS(product.price)}
             </span>
+          </div>
+          {product.stock === 0 && (
+            <span className="text-xs font-medium text-red-500">Sin stock</span>
           )}
-          <span className="text-base font-bold text-white sm:text-lg">
-            {formatARS(product.price)}
-          </span>
         </div>
 
         <button
@@ -96,7 +101,8 @@ export default function ProductCard({ product }: { product: Product }) {
               image_url: thumbnail ?? null,
             })
           }
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-zinc-200 active:scale-[0.98]"
+          disabled={product.stock === 0}
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-zinc-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ShoppingCart size={16} />
           Agregar al carrito

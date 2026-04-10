@@ -10,12 +10,14 @@ import {
   Menu,
   X,
   Home,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
 
 const NAV_LINKS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/products", label: "Productos", icon: Package },
+  { href: "/admin/settings", label: "Configuración", icon: Settings },
 ] as const;
 
 export default function AdminNav({ email }: { email: string }) {

@@ -1,19 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search, Loader2 } from "lucide-react";
 import ProductCard, { Product } from "@/src/components/ProductCard";
 import { useSearchStore } from "@/src/store/searchStore";
 import { supabase } from "@/src/lib/supabase";
+import { useCategories } from "@/src/hooks/useCategories";
 
-const CATEGORIES = [
-  "Todos",
-  "Electrodomésticos",
-  "Muebles",
-  "Cocinas y Hornos",
-  "Parrillas y Discos",
-  "Bazar",
-];
+const PAGE_SIZE = 20;
 
 export default function CatalogSection({
   initialProducts,
@@ -30,8 +24,33 @@ export default function CatalogSection({
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [loading, setLoading] = useState(false);
 
+  const { categories: dbCategories } = useCategories();
+  const CATEGORIES = ["Todos", ...dbCategories];
+
+  // Infinite scroll states (catalog mode only, when !limit)
+  const [page, setPage] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(initialProducts.length >= PAGE_SIZE);
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  // Skip the very first fetch — SSR already populated `products`
+  const skipInitialFetch = useRef(true);
+  // Prevent a stale fetch when filters change while page > 0
+  const pendingReset = useRef(false);
+
+  const isInfiniteMode = !limit;
+
+  // Debounce the search query
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
   useEffect(() => {
-    // No search/filter active → show SSR products, no DB call needed
+    const t = setTimeout(() => setDebouncedQuery(query), 350);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  // ── HOME PAGE (limit mode): filter against initialProducts or DB ──────────
+  useEffect(() => {
+    if (isInfiniteMode) return;
+
     if (!query.trim() && activeCategory === "Todos") {
       setProducts(initialProducts);
       return;
@@ -51,7 +70,6 @@ export default function CatalogSection({
           `name.ilike.%${q}%,description.ilike.%${q}%,short_description.ilike.%${q}%,category.ilike.%${q}%`
         );
       }
-
       if (activeCategory !== "Todos") {
         dbQuery = dbQuery.ilike("category", activeCategory);
       }
@@ -65,17 +83,101 @@ export default function CatalogSection({
       clearTimeout(timer);
       setLoading(false);
     };
-  }, [query, activeCategory, initialProducts]);
+  }, [query, activeCategory, initialProducts, isInfiniteMode]);
+
+  // ── CATALOG MODE: reset when search/filter changes ───────────────────────
+  useEffect(() => {
+    if (!isInfiniteMode) return;
+    // Initial mount: just set hasMore from SSR data, don't reset
+    if (skipInitialFetch.current) return;
+
+    pendingReset.current = true;
+    setProducts([]);
+    setHasMore(true);
+    setPage(0);
+  }, [debouncedQuery, activeCategory, isInfiniteMode]);
+
+  // ── CATALOG MODE: fetch a page ────────────────────────────────────────────
+  useEffect(() => {
+    if (!isInfiniteMode) return;
+
+    // First mount: SSR data already in state
+    if (skipInitialFetch.current) {
+      skipInitialFetch.current = false;
+      setHasMore(initialProducts.length >= PAGE_SIZE);
+      return;
+    }
+
+    // Wait until page resets to 0 after a filter change
+    if (pendingReset.current && page !== 0) return;
+    pendingReset.current = false;
+
+    const isAppend = page > 0;
+    if (isAppend) setIsLoadingMore(true);
+    else setLoading(true);
+
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    let dbQuery = supabase
+      .from("products")
+      .select("*")
+      .eq("estado", true)
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (debouncedQuery.trim()) {
+      const q = debouncedQuery.trim();
+      dbQuery = dbQuery.or(
+        `name.ilike.%${q}%,description.ilike.%${q}%,short_description.ilike.%${q}%,category.ilike.%${q}%`
+      );
+    }
+    if (activeCategory !== "Todos") {
+      dbQuery = dbQuery.ilike("category", activeCategory);
+    }
+
+    dbQuery.then(({ data }) => {
+      const results = (data as Product[]) ?? [];
+
+      if (isAppend) {
+        setProducts((prev) => [...prev, ...results]);
+        setIsLoadingMore(false);
+      } else {
+        setProducts(results);
+        setLoading(false);
+      }
+
+      setHasMore(results.length >= PAGE_SIZE);
+    });
+  }, [page, debouncedQuery, activeCategory, isInfiniteMode, initialProducts]);
+
+  // ── INTERSECTION OBSERVER ─────────────────────────────────────────────────
+  useEffect(() => {
+    if (!isInfiniteMode) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !isLoadingMore && !loading) {
+          setPage((p) => p + 1);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isInfiniteMode, hasMore, isLoadingMore, loading]);
+
+  const displayedProducts = limit ? products.slice(0, limit) : products;
 
   return (
     <>
-      {/* Mobile search — only visible below md */}
+      {/* Mobile search */}
       <div className="px-4 pt-4 md:hidden">
         <div className="relative">
-          <Search
-            size={18}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400"
-          />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input
             type="text"
             value={query}
@@ -109,34 +211,50 @@ export default function CatalogSection({
       </section>
 
       {/* Products grid */}
-      <section id="destacados" className="px-4 pt-8 pb-16 sm:px-6 lg:px-8">
+      <section id="destacados" className="px-4 pb-16 pt-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="mb-6 flex items-center gap-3">
             <h2 className="text-lg font-semibold text-white">{title}</h2>
-            {loading && (
-              <Loader2 size={18} className="animate-spin text-zinc-500" />
-            )}
+            {loading && <Loader2 size={18} className="animate-spin text-zinc-500" />}
           </div>
 
-          {!loading && products.length === 0 ? (
+          {!loading && displayedProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-800 py-20">
-              <p className="text-base text-zinc-500">
-                No se encontraron productos.
-              </p>
+              <p className="text-base text-zinc-500">No se encontraron productos.</p>
               <p className="mt-1 text-sm text-zinc-600">
                 Probá con otra búsqueda o categoría.
               </p>
             </div>
           ) : (
             <div
-              className={`grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4 transition-opacity duration-200 ${
-                loading ? "opacity-40 pointer-events-none" : "opacity-100"
+              className={`grid grid-cols-2 gap-3 transition-opacity duration-200 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4 ${
+                loading ? "pointer-events-none opacity-40" : "opacity-100"
               }`}
             >
-              {(limit ? products.slice(0, limit) : products).map((product) => (
+              {displayedProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
+          )}
+
+          {/* Sentinel + feedback (catalog mode only) */}
+          {isInfiniteMode && (
+            <>
+              <div ref={sentinelRef} className="h-1" />
+
+              {isLoadingMore && (
+                <div className="mt-8 flex items-center justify-center gap-2">
+                  <Loader2 size={18} className="animate-spin text-zinc-500" />
+                  <span className="text-sm text-zinc-500">Cargando más productos...</span>
+                </div>
+              )}
+
+              {!hasMore && displayedProducts.length > 0 && !isLoadingMore && (
+                <p className="mt-8 text-center text-xs text-zinc-600">
+                  No hay más productos para mostrar
+                </p>
+              )}
+            </>
           )}
         </div>
       </section>

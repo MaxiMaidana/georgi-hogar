@@ -14,7 +14,8 @@ export default async function CatalogoPage() {
     .from("products")
     .select("*")
     .eq("estado", true)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(0, 19);
 
   return (
     <div className="flex flex-1 flex-col bg-black">

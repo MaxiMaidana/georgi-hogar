@@ -5,12 +5,7 @@ import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import { ArrowLeft, ImagePlus, X, Save } from "lucide-react";
 import Link from "next/link";
-
-const CATEGORIES = [
-  "Bazar",
-  "Cocinas y Hornos",
-  "Parrillas y Discos",
-] as const;
+import { useCategories } from "@/src/hooks/useCategories";
 
 interface FormData {
   name: string;
@@ -25,6 +20,7 @@ interface FormData {
   burners: string;
   color: string;
   recommended_use: string;
+  destacado: boolean;
 }
 
 const INITIAL_FORM: FormData = {
@@ -40,6 +36,7 @@ const INITIAL_FORM: FormData = {
   burners: "",
   color: "",
   recommended_use: "",
+  destacado: false,
 };
 
 function SectionCard({
@@ -102,6 +99,8 @@ export default function NewProductPage() {
       ),
     []
   );
+
+  const { categories: CATEGORIES, loading: loadingCategories } = useCategories();
 
   function handleChange(
     e: React.ChangeEvent<
@@ -178,6 +177,7 @@ export default function NewProductPage() {
         burners: formData.burners !== "" ? Number(formData.burners) : 0,
         color: formData.color || null,
         recommended_use: formData.recommended_use || null,
+        destacado: formData.destacado,
         images: imageUrls,
         image_url: imageUrls[0] ?? null,
         is_active: true,
@@ -242,10 +242,11 @@ export default function NewProductPage() {
                 required
                 value={formData.category}
                 onChange={handleChange}
+                disabled={loadingCategories}
                 className={INPUT_CLASSES}
               >
                 <option value="" disabled>
-                  Seleccioná una categoría
+                  {loadingCategories ? "Cargando categorías..." : "Seleccioná una categoría"}
                 </option>
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -412,6 +413,34 @@ export default function NewProductPage() {
                 placeholder="Ej: Restaurantes, foodtrucks"
               />
             </div>
+          </div>
+        </SectionCard>
+
+        {/* Estado y Visibilidad */}
+        <SectionCard title="Estado y Visibilidad">
+          <div className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3">
+            <div>
+              <p className="text-sm font-medium text-zinc-200">Producto Destacado</p>
+              <p className="text-xs text-zinc-500">
+                {formData.destacado
+                  ? "Aparece en la sección Destacados de la home"
+                  : "No aparece en la sección Destacados"}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFormData((f) => ({ ...f, destacado: !f.destacado }))}
+              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+                formData.destacado ? "bg-amber-500" : "bg-zinc-600"
+              }`}
+              aria-label="Toggle destacado"
+            >
+              <span
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                  formData.destacado ? "translate-x-5" : "translate-x-0.5"
+                }`}
+              />
+            </button>
           </div>
         </SectionCard>
 

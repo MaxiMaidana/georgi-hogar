@@ -11,13 +11,13 @@ export default async function Home() {
     .from("products")
     .select("*")
     .eq("estado", true)
+    .eq("destacado", true)
     .order("created_at", { ascending: false });
 
   return (
     <div className="flex flex-1 flex-col bg-black">
       <CatalogSection
         initialProducts={(products as Product[]) ?? []}
-        limit={4}
         title="Destacados"
       />
 

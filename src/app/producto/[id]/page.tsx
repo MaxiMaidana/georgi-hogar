@@ -138,9 +138,7 @@ export default async function ProductoPage({
 
             {/* Stock */}
             {product.stock > 0 ? (
-              <p className="text-sm text-green-400">
-                En stock ({product.stock} disponibles)
-              </p>
+              <p className="text-sm text-green-400">En stock</p>
             ) : (
               <p className="text-sm text-red-500">Sin stock</p>
             )}
@@ -152,6 +150,7 @@ export default async function ProductoPage({
                 name={product.name}
                 price={product.price}
                 image_url={thumbnail}
+                stock={product.stock}
               />
             </div>
 

@@ -4,10 +4,9 @@ import { useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import { Loader2, ImageOff, Plus, X, Save } from "lucide-react";
+import { useCategories } from "@/src/hooks/useCategories";
 
 const BUCKET = "products";
-
-const CATEGORIES = ["Bazar", "Cocinas y Hornos", "Parrillas y Discos"] as const;
 
 export interface ProductToEdit {
   id: string;
@@ -26,6 +25,7 @@ export interface ProductToEdit {
   image_url: string | null;
   imagenes: string[] | null;
   estado: boolean;
+  destacado: boolean | null;
 }
 
 interface FormData {
@@ -42,6 +42,7 @@ interface FormData {
   color: string;
   recommended_use: string;
   estado: boolean;
+  destacado: boolean;
 }
 
 interface PendingFile {
@@ -93,6 +94,8 @@ export default function EditProductForm({ product }: { product: ProductToEdit })
     []
   );
 
+  const { categories: CATEGORIES, loading: loadingCategories } = useCategories();
+
   // Form fields
   const [form, setForm] = useState<FormData>({
     name: product.name,
@@ -108,6 +111,7 @@ export default function EditProductForm({ product }: { product: ProductToEdit })
     color: product.color ?? "",
     recommended_use: product.recommended_use ?? "",
     estado: product.estado,
+    destacado: product.destacado ?? false,
   });
 
   // Two-phase image management
@@ -184,6 +188,7 @@ export default function EditProductForm({ product }: { product: ProductToEdit })
         color: form.color || null,
         recommended_use: form.recommended_use || null,
         estado: form.estado,
+        destacado: form.destacado,
         imagenes: finalImages,
         image_url: finalImages[0] ?? null,
       };
@@ -239,9 +244,12 @@ export default function EditProductForm({ product }: { product: ProductToEdit })
               required
               value={form.category}
               onChange={handleChange}
+              disabled={loadingCategories}
               className={INPUT_CLASSES}
             >
-              <option value="" disabled>Seleccioná una categoría</option>
+              <option value="" disabled>
+                {loadingCategories ? "Cargando categorías..." : "Seleccioná una categoría"}
+              </option>
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
@@ -328,16 +336,47 @@ export default function EditProductForm({ product }: { product: ProductToEdit })
       </SectionCard>
 
       {/* Estado */}
-      <SectionCard title="Estado">
-        <select
-          name="estado"
-          value={form.estado ? "1" : "0"}
-          onChange={(e) => setForm((f) => ({ ...f, estado: e.target.value === "1" }))}
-          className={INPUT_CLASSES}
-        >
-          <option value="1">Activo (visible en la tienda)</option>
-          <option value="0">Pausado (oculto en la tienda)</option>
-        </select>
+      <SectionCard title="Estado y Visibilidad">
+        <div className="flex flex-col gap-4">
+          <div>
+            <Label htmlFor="estado-select">Estado en la tienda</Label>
+            <select
+              id="estado-select"
+              name="estado"
+              value={form.estado ? "1" : "0"}
+              onChange={(e) => setForm((f) => ({ ...f, estado: e.target.value === "1" }))}
+              className={INPUT_CLASSES}
+            >
+              <option value="1">Activo (visible en la tienda)</option>
+              <option value="0">Pausado (oculto en la tienda)</option>
+            </select>
+          </div>
+
+          <div className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3">
+            <div>
+              <p className="text-sm font-medium text-zinc-200">Producto Destacado</p>
+              <p className="text-xs text-zinc-500">
+                {form.destacado
+                  ? "Aparece en la sección Destacados de la home"
+                  : "No aparece en la sección Destacados"}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setForm((f) => ({ ...f, destacado: !f.destacado }))}
+              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+                form.destacado ? "bg-amber-500" : "bg-zinc-600"
+              }`}
+              aria-label="Toggle destacado"
+            >
+              <span
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                  form.destacado ? "translate-x-5" : "translate-x-0.5"
+                }`}
+              />
+            </button>
+          </div>
+        </div>
       </SectionCard>
 
       {/* Características */}

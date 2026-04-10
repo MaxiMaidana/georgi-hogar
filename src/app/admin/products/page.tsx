@@ -9,7 +9,7 @@ export default async function ProductsPage() {
   const supabase = await createSupabaseServerClient();
   const { data: products } = await supabase
     .from("products")
-    .select("id, name, price, stock, image_url, imagenes, estado, created_at")
+    .select("id, name, price, stock, image_url, imagenes, estado, destacado, created_at")
     .order("created_at", { ascending: false });
 
   return (

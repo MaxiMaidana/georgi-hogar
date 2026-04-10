@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { Search, Pencil, Check, Pause, Loader2 } from "lucide-react";
+import { Search, Pencil, Check, Pause, Loader2, Star } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
 
 export interface AdminProduct {
@@ -13,6 +13,7 @@ export interface AdminProduct {
   image_url: string | null;
   imagenes: string[] | null;
   estado: boolean;
+  destacado: boolean | null;
   created_at: string;
 }
 
@@ -50,6 +51,15 @@ function StatusBadge({ isActive }: { isActive: boolean }) {
   );
 }
 
+function DestacadoBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-amber-950/50 px-2.5 py-0.5 text-xs font-medium text-amber-400">
+      <Star size={11} />
+      Destacado
+    </span>
+  );
+}
+
 function ProductThumb({ url, name }: { url: string | null; name: string }) {
   if (url) {
     return <img src={url} alt={name} className="h-10 w-10 rounded-xl object-cover" />;
@@ -81,7 +91,7 @@ export default function ProductsTable({
     const timer = setTimeout(async () => {
       const { data } = await supabase
         .from("products")
-        .select("id, name, price, stock, image_url, imagenes, estado, created_at")
+        .select("id, name, price, stock, image_url, imagenes, estado, destacado, created_at")
         .ilike("name", `%${searchTerm.trim()}%`)
         .order("created_at", { ascending: false });
       setProducts((data as AdminProduct[]) ?? []);
@@ -144,8 +154,9 @@ export default function ProductsTable({
                     <p className="mt-0.5 text-sm text-zinc-400">{formatARS(product.price)}</p>
                   </div>
                   <div className="mt-2 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
                       <StatusBadge isActive={product.estado} />
+                      {product.destacado && <DestacadoBadge />}
                       <span className="text-xs text-zinc-500">Stock: {product.stock}</span>
                     </div>
                     <Link
@@ -175,6 +186,7 @@ export default function ProductsTable({
                   <th className="px-5 py-3.5 font-medium text-zinc-500">Precio</th>
                   <th className="px-5 py-3.5 font-medium text-zinc-500">Stock</th>
                   <th className="px-5 py-3.5 font-medium text-zinc-500">Estado</th>
+                  <th className="px-5 py-3.5 font-medium text-zinc-500">Destacado</th>
                   <th className="px-5 py-3.5 font-medium text-zinc-500">Acciones</th>
                 </tr>
               </thead>
@@ -189,6 +201,13 @@ export default function ProductsTable({
                     <td className="px-5 py-4 text-zinc-400">{product.stock}</td>
                     <td className="px-5 py-4">
                       <StatusBadge isActive={product.estado} />
+                    </td>
+                    <td className="px-5 py-4">
+                      {product.destacado ? (
+                        <DestacadoBadge />
+                      ) : (
+                        <span className="text-xs text-zinc-600">—</span>
+                      )}
                     </td>
                     <td className="px-5 py-4">
                       <Link
