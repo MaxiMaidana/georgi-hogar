@@ -1,15 +1,39 @@
 @import "tailwindcss";
 
 :root {
-  --background: #000000;
-  --foreground: #ededed;
+  --background: #F8FAFC;
+  --foreground: #111827;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-montserrat);
+
+  /* Navy Blue — confianza y profesionalismo */
+  --color-navy-50:  #EEF2F7;
+  --color-navy-100: #D8E4F0;
+  --color-navy-200: #B1C9E1;
+  --color-navy-300: #8BADD1;
+  --color-navy-400: #6392C2;
+  --color-navy-500: #3B77B3;
+  --color-navy-600: #2D5C8A;
+  --color-navy-700: #1E3A5F;
+  --color-navy-800: #152940;
+  --color-navy-900: #0C1B2B;
+
+  /* Orange — CTA y ofertas */
+  --color-brand-50:  #FFF7ED;
+  --color-brand-100: #FFEDD5;
+  --color-brand-200: #FED7AA;
+  --color-brand-300: #FDBA74;
+  --color-brand-400: #FB923C;
+  --color-brand-500: #F97316;
+  --color-brand-600: #EA6C0A;
+  --color-brand-700: #C2570A;
+  --color-brand-800: #9A4109;
+  --color-brand-900: #7C3408;
 }
 
 body {

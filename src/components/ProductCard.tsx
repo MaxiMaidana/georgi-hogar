@@ -47,7 +47,7 @@ export default function ProductCard({ product }: { product: Product }) {
     : 0;
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-800/60 bg-zinc-900 transition-all hover:border-zinc-700">
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-gray-300">
       {/* Image + discount badge */}
       <Link href={`/producto/${product.id}`} className="relative block">
         {thumbnail ? (
@@ -57,12 +57,12 @@ export default function ProductCard({ product }: { product: Product }) {
             className="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105 sm:h-52"
           />
         ) : (
-          <div className="flex h-44 w-full items-center justify-center bg-zinc-800 sm:h-52">
-            <span className="text-xs text-zinc-500">Sin imagen</span>
+          <div className="flex h-44 w-full items-center justify-center bg-gray-100 sm:h-52">
+            <span className="text-xs text-gray-400">Sin imagen</span>
           </div>
         )}
         {hasDiscount && (
-          <span className="absolute left-2 top-2 rounded-lg bg-black/70 px-2 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+          <span className="absolute left-2 top-2 rounded-lg bg-brand-500 px-2 py-1 text-[11px] font-semibold text-white">
             -{discountPercent}% OFF
           </span>
         )}
@@ -71,7 +71,7 @@ export default function ProductCard({ product }: { product: Product }) {
       <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4">
         <Link
           href={`/producto/${product.id}`}
-          className="line-clamp-2 text-sm font-medium text-zinc-100 transition-colors hover:text-white sm:text-base"
+          className="line-clamp-2 text-sm font-medium text-gray-900 transition-colors hover:text-navy-700 sm:text-base"
         >
           {product.name}
         </Link>
@@ -79,11 +79,11 @@ export default function ProductCard({ product }: { product: Product }) {
         <div className="mt-auto flex flex-col gap-1 pt-1">
           <div className="flex items-baseline gap-2">
             {hasDiscount && (
-              <span className="text-xs text-zinc-500 line-through sm:text-sm">
+              <span className="text-xs text-gray-400 line-through sm:text-sm">
                 {formatARS(product.previous_price!)}
               </span>
             )}
-            <span className="text-base font-bold text-white sm:text-lg">
+            <span className="text-base font-bold text-gray-900 sm:text-lg">
               {formatARS(product.price)}
             </span>
           </div>
@@ -102,7 +102,7 @@ export default function ProductCard({ product }: { product: Product }) {
             })
           }
           disabled={product.stock === 0}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-zinc-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-500 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ShoppingCart size={16} />
           Agregar al carrito

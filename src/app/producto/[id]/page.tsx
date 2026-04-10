@@ -85,12 +85,12 @@ export default async function ProductoPage({
   ].filter((s): s is { label: string; value: string } => s !== null);
 
   return (
-    <div className="flex flex-1 flex-col bg-black">
+    <div className="flex flex-1 flex-col bg-[#F8FAFC]">
       <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Back link */}
         <Link
           href="/"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-400 transition-colors hover:text-white"
+          className="mb-6 inline-flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900"
         >
           <ArrowLeft size={16} />
           Volver al catálogo
@@ -104,32 +104,32 @@ export default async function ProductoPage({
           {/* Product info */}
           <div className="flex flex-col gap-4">
             {product.category && (
-              <span className="w-fit rounded-full bg-zinc-800 px-3 py-1 text-xs font-medium text-zinc-400">
+              <span className="w-fit rounded-full bg-navy-50 px-3 py-1 text-xs font-medium text-navy-600">
                 {product.category}
               </span>
             )}
 
-            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
               {product.name}
             </h1>
 
             {product.short_description && (
-              <p className="text-base text-zinc-400">
+              <p className="text-base text-gray-600">
                 {product.short_description}
               </p>
             )}
 
             {/* Price */}
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-bold text-white">
+              <span className="text-3xl font-bold text-gray-900">
                 {formatARS(product.price)}
               </span>
               {hasDiscount && (
                 <>
-                  <span className="text-lg text-zinc-500 line-through">
+                  <span className="text-lg text-gray-400 line-through">
                     {formatARS(product.previous_price!)}
                   </span>
-                  <span className="rounded-full bg-green-900/30 px-2.5 py-0.5 text-xs font-semibold text-green-400">
+                  <span className="rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-semibold text-brand-700">
                     -{discountPercent}%
                   </span>
                 </>
@@ -138,7 +138,7 @@ export default async function ProductoPage({
 
             {/* Stock */}
             {product.stock > 0 ? (
-              <p className="text-sm text-green-400">En stock</p>
+              <p className="text-sm text-green-600">En stock</p>
             ) : (
               <p className="text-sm text-red-500">Sin stock</p>
             )}
@@ -160,12 +160,12 @@ export default async function ProductoPage({
                 {specs.map((spec) => (
                   <div
                     key={spec.label}
-                    className="rounded-xl border border-zinc-800 bg-zinc-900 p-3"
+                    className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm"
                   >
-                    <p className="text-xs font-medium text-zinc-500">
+                    <p className="text-xs font-medium text-gray-500">
                       {spec.label}
                     </p>
-                    <p className="mt-0.5 text-sm font-semibold text-zinc-100">
+                    <p className="mt-0.5 text-sm font-semibold text-gray-900">
                       {spec.value}
                     </p>
                   </div>
@@ -177,11 +177,11 @@ export default async function ProductoPage({
 
         {/* Description section */}
         {product.description && (
-          <section className="mt-12 rounded-2xl border border-zinc-800 bg-zinc-900 p-6 sm:p-8">
-            <h2 className="mb-4 text-lg font-bold text-white">
+          <section className="mt-12 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+            <h2 className="mb-4 text-lg font-bold text-gray-900">
               Descripción
             </h2>
-            <p className="whitespace-pre-line leading-relaxed text-zinc-400">
+            <p className="whitespace-pre-line leading-relaxed text-gray-600">
               {product.description}
             </p>
           </section>

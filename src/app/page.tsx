@@ -15,7 +15,7 @@ export default async function Home() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="flex flex-1 flex-col bg-black">
+    <div className="flex flex-1 flex-col bg-[#F8FAFC]">
       <CatalogSection
         initialProducts={(products as Product[]) ?? []}
         title="Destacados"

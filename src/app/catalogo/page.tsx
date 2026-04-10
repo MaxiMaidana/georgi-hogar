@@ -18,7 +18,7 @@ export default async function CatalogoPage() {
     .range(0, 19);
 
   return (
-    <div className="flex flex-1 flex-col bg-black">
+    <div className="flex flex-1 flex-col bg-[#F8FAFC]">
       <CatalogSection
         initialProducts={(products as Product[]) ?? []}
         title="Catálogo Completo"

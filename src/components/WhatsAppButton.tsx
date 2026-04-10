@@ -2,7 +2,7 @@
 
 import { MessageCircle } from "lucide-react";
 
-const WHATSAPP_NUMBER = "5491100000000";
+const WHATSAPP_NUMBER = "5491130594139";
 const MESSAGE = "Hola! Me interesa un producto de Georgi Hogar 🙌";
 
 export default function WhatsAppButton() {

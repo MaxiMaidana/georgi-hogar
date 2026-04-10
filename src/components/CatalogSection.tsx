@@ -177,13 +177,13 @@ export default function CatalogSection({
       {/* Mobile search */}
       <div className="px-4 pt-4 md:hidden">
         <div className="relative">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="¿Qué estás buscando?"
-            className="w-full rounded-full bg-zinc-800 py-3 pl-11 pr-4 text-sm text-white placeholder:text-zinc-400 outline-none transition-colors focus:bg-zinc-700 focus:ring-1 focus:ring-zinc-600"
+            className="w-full rounded-full border border-gray-300 bg-white py-3 pl-11 pr-4 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition-colors focus:border-navy-400 focus:ring-1 focus:ring-navy-400"
           />
         </div>
       </div>
@@ -191,7 +191,7 @@ export default function CatalogSection({
       {/* Categories */}
       <section className="px-4 pt-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <h2 className="mb-4 text-lg font-semibold text-white">Categorías</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">Categorías</h2>
           <div className="hide-scrollbar flex gap-2 overflow-x-auto pb-2">
             {CATEGORIES.map((cat) => (
               <button
@@ -199,8 +199,8 @@ export default function CatalogSection({
                 onClick={() => setActiveCategory(cat)}
                 className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   activeCategory === cat
-                    ? "bg-white text-black"
-                    : "bg-zinc-900 text-zinc-300 hover:bg-zinc-800"
+                    ? "bg-navy-700 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 {cat}
@@ -214,14 +214,14 @@ export default function CatalogSection({
       <section id="destacados" className="px-4 pb-16 pt-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="mb-6 flex items-center gap-3">
-            <h2 className="text-lg font-semibold text-white">{title}</h2>
-            {loading && <Loader2 size={18} className="animate-spin text-zinc-500" />}
+            <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+            {loading && <Loader2 size={18} className="animate-spin text-gray-400" />}
           </div>
 
           {!loading && displayedProducts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-800 py-20">
-              <p className="text-base text-zinc-500">No se encontraron productos.</p>
-              <p className="mt-1 text-sm text-zinc-600">
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 py-20">
+              <p className="text-base text-gray-500">No se encontraron productos.</p>
+              <p className="mt-1 text-sm text-gray-400">
                 Probá con otra búsqueda o categoría.
               </p>
             </div>
@@ -244,13 +244,13 @@ export default function CatalogSection({
 
               {isLoadingMore && (
                 <div className="mt-8 flex items-center justify-center gap-2">
-                  <Loader2 size={18} className="animate-spin text-zinc-500" />
-                  <span className="text-sm text-zinc-500">Cargando más productos...</span>
+                  <Loader2 size={18} className="animate-spin text-gray-400" />
+                  <span className="text-sm text-gray-500">Cargando más productos...</span>
                 </div>
               )}
 
               {!hasMore && displayedProducts.length > 0 && !isLoadingMore && (
-                <p className="mt-8 text-center text-xs text-zinc-600">
+                <p className="mt-8 text-center text-xs text-gray-400">
                   No hay más productos para mostrar
                 </p>
               )}
