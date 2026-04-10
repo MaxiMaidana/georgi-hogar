@@ -1,12 +1,29 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
+import { supabase } from "@/src/lib/supabase";
 
-const WHATSAPP_NUMBER = "5491130594139";
 const MESSAGE = "Hola! Me interesa un producto de Georgi Hogar 🙌";
+const FALLBACK = "5491130594139";
 
 export default function WhatsAppButton() {
-  const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(MESSAGE)}`;
+  const [numero, setNumero] = useState(FALLBACK);
+
+  useEffect(() => {
+    supabase
+      .from("configuracion_envios")
+      .select("whatsapp_numero")
+      .limit(1)
+      .single()
+      .then(({ data }) => {
+        if (data?.whatsapp_numero) {
+          setNumero(data.whatsapp_numero.replace(/\D/g, ""));
+        }
+      });
+  }, []);
+
+  const url = `https://wa.me/${numero}?text=${encodeURIComponent(MESSAGE)}`;
 
   return (
     <a

@@ -6,7 +6,6 @@ import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 import { createBrowserClient } from "@supabase/ssr";
 import { useCartStore, CartItem } from "@/src/store/cartStore";
 
-const WHATSAPP_NUMBER = "5491130594139";
 const LIBRARIES: ["places"] = ["places"];
 
 type MetodoEntrega = "retiro" | "envio" | null;
@@ -15,6 +14,7 @@ type ShippingConfig = {
   direccion_deposito: string;
   precio_base_envio: number;
   precio_por_km: number;
+  whatsapp_numero: string;
 };
 
 function formatARS(price: number): string {
@@ -69,7 +69,7 @@ export default function CartDrawer() {
     async function fetchConfig() {
       const { data } = await supabase
         .from("configuracion_envios")
-        .select("direccion_deposito, precio_base_envio, precio_por_km")
+        .select("direccion_deposito, precio_base_envio, precio_por_km, whatsapp_numero")
         .limit(1)
         .single();
       if (data) setShippingConfig(data as ShippingConfig);
@@ -197,7 +197,8 @@ export default function CartDrawer() {
       }`,
     ].join("\n");
 
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+    const numero = (shippingConfig?.whatsapp_numero ?? "5491130594139").replace(/\D/g, "");
+    const url = `https://wa.me/${numero}?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
 

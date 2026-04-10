@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 import { createBrowserClient } from "@supabase/ssr";
-import { MapPin, DollarSign, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { MapPin, DollarSign, Phone, X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
 const LIBRARIES: ["places"] = ["places"];
 
@@ -12,6 +12,7 @@ type ConfigRow = {
   direccion_deposito: string;
   precio_base_envio: number;
   precio_por_km: number;
+  whatsapp_numero: string;
 };
 
 type ToastState = { type: "success" | "error"; message: string } | null;
@@ -39,6 +40,8 @@ export default function ConfiguracionEnvios() {
   const [direccionOrigen, setDireccionOrigen] = useState("");
   const [precioBase, setPrecioBase] = useState<number | "">("");
   const [precioPorKm, setPrecioPorKm] = useState<number | "">("");
+  const [whatsappNumero, setWhatsappNumero] = useState("");
+  const [whatsappLocked, setWhatsappLocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
@@ -66,6 +69,9 @@ export default function ConfiguracionEnvios() {
           setDireccionOrigen(row.direccion_deposito ?? "");
           setPrecioBase(row.precio_base_envio ?? "");
           setPrecioPorKm(row.precio_por_km ?? "");
+          const numLimpio = (row.whatsapp_numero ?? "").replace(/\D/g, "");
+          setWhatsappNumero(numLimpio);
+          if (numLimpio) setWhatsappLocked(true);
         }
       } catch (err) {
         console.error("Error cargando configuración:", err);
@@ -99,6 +105,10 @@ export default function ConfiguracionEnvios() {
       showToast("error", "Completá todos los campos de precio.");
       return;
     }
+    if (!whatsappNumero.trim()) {
+      showToast("error", "Completá el número de WhatsApp.");
+      return;
+    }
 
     setSaving(true);
     try {
@@ -106,6 +116,7 @@ export default function ConfiguracionEnvios() {
         direccion_deposito: direccionOrigen.trim(),
         precio_base_envio: Number(precioBase),
         precio_por_km: Number(precioPorKm),
+        whatsapp_numero: whatsappNumero.trim().replace(/\D/g, ""),
       };
 
       let error;
@@ -126,6 +137,7 @@ export default function ConfiguracionEnvios() {
       }
 
       if (error) throw error;
+      setWhatsappLocked(true);
       showToast("success", "Configuración guardada correctamente.");
     } catch (err) {
       console.error("Error guardando configuración:", err);
@@ -240,6 +252,41 @@ export default function ConfiguracionEnvios() {
                 className="w-full rounded-xl border border-zinc-700 bg-zinc-800 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-zinc-500 outline-none transition-colors focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
               />
             </div>
+          </div>
+
+          {/* WhatsApp */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-zinc-400">
+              Número de WhatsApp de la empresa
+            </label>
+            <div className="relative">
+              <Phone
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500"
+              />
+              {whatsappLocked && whatsappNumero ? (
+                <div className="flex items-center rounded-xl border border-zinc-700 bg-zinc-800/60 py-2.5 pl-10 pr-3">
+                  <span className="flex-1 text-sm text-zinc-300">{whatsappNumero}</span>
+                  <button
+                    type="button"
+                    onClick={() => { setWhatsappNumero(""); setWhatsappLocked(false); }}
+                    className="rounded p-0.5 text-zinc-500 transition-colors hover:text-red-400"
+                    aria-label="Borrar número"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <input
+                  type="tel"
+                  value={whatsappNumero}
+                  onChange={(e) => setWhatsappNumero(e.target.value)}
+                  placeholder="Ej: 5491130594139"
+                  className="w-full rounded-xl border border-zinc-700 bg-zinc-800 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-zinc-500 outline-none transition-colors focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
+                />
+              )}
+            </div>
+            <p className="text-xs text-zinc-600">Solo números sin espacios ni &quot;+&quot;</p>
           </div>
 
           {/* Save button */}
